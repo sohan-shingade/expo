@@ -80,13 +80,9 @@ NSString * const EXAppDidRegisterUserNotificationSettingsNotification = @"kEXApp
   return controller;
 }
 
-#pragma mark - misc AppDelegate hooks
-
-- (void)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+- (void)setUpApplication:(UIApplication *)application withLaunchOptions:(nullable NSDictionary *)launchOptions
 {
   [DDLog addLogger:[DDOSLogger sharedInstance]];
-  
-
   RCTSetFatalHandler(handleFatalReactError);
 
   // init analytics
@@ -103,11 +99,20 @@ NSString * const EXAppDidRegisterUserNotificationSettingsNotification = @"kEXApp
     }
   }
 
-  [UNUserNotificationCenter currentNotificationCenter].delegate = (id<UNUserNotificationCenterDelegate>) [EXKernel sharedInstance].serviceRegistry.notificationsManager;
-  // This is safe to call; if the app doesn't have permission to display user-facing notifications
-  // then registering for a push token is a no-op
-  [[EXKernel sharedInstance].serviceRegistry.remoteNotificationManager registerForRemoteNotifications];
   _launchOptions = launchOptions;
+}
+
+#pragma mark - misc AppDelegate hooks
+
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+{
+  if (![UNUserNotificationCenter currentNotificationCenter].delegate) {
+    [[UNUserNotificationCenter currentNotificationCenter] setDelegate:(id<UNUserNotificationCenterDelegate>) [EXKernel sharedInstance].serviceRegistry.notificationsManager];
+    // This is safe to call; if the app doesn't have permission to display user-facing notifications
+    // then registering for a push token is a no-op
+    [[EXKernel sharedInstance].serviceRegistry.remoteNotificationManager registerForRemoteNotifications];
+  }
+  return YES;
 }
 
 #pragma mark - Crash handling

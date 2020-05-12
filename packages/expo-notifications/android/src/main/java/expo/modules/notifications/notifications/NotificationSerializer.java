@@ -1,7 +1,5 @@
 package expo.modules.notifications.notifications;
 
-import android.content.ContentResolver;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 
